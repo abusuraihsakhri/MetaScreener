@@ -1,5 +1,5 @@
-
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Papers from './pages/Papers';
 import Screening from './pages/Screening';
