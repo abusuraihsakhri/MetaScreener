@@ -1,0 +1,54 @@
+name: Build and Release Artifacts
+
+on:
+  # Triggers whenever a new tag like v1.0.0 is pushed
+  push:
+    tags:
+      - 'v*.*.*'
+  # Also trigger on manual dispatch
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build React UI
+        run: |
+          cd MetaScreener_UI
+          npm ci
+          npm run build
+          cd ..
+
+      - name: Archive Production Artifacts
+        run: |
+          # Zip the built frontend
+          zip -r MetaScreener-UI-Build.zip MetaScreener_UI/dist
+          
+          # Zip the python backend excluding dev artifacts
+          zip -r MetaScreener-Backend-API.zip MetaScreener_Web -x "*/__pycache__/*" -x "*/venv/*" -x "*/uploads/*" -x "*.db" -x "*.log"
+          
+          # Zip the legacy desktop app
+          zip -r MetaScreener-Desktop-Legacy.zip MetaScreener -x "*/__pycache__/*" -x "*/venv/*" -x "*.db" -x "*.log"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MetaScreener-UI-Build.zip
+            MetaScreener-Backend-API.zip
+            MetaScreener-Desktop-Legacy.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

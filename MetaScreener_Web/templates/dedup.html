@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Deduplicate — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Deduplication</h2>
+  <p class="page-subtitle">{{ stats.total }} total · {{ stats.duplicates }} duplicates · {{ stats.unique }} unique</p>
+</div>
+
+{% if groups %}
+<div class="card mb-2">
+  <p>Found <strong>{{ groups|length }}</strong> duplicate group(s). Select which paper to keep in each group, then click <strong>Resolve</strong>.</p>
+  <form method="POST" action="{{ url_for('dedup.resolve') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for group in groups %}
+    <div class="dedup-group">
+      <div class="dedup-group-header">Group {{ loop.index }} — {{ group.papers|length }} papers</div>
+      {% for paper in group.papers %}
+      <div class="dedup-row {% if paper.id == group.keep_id %}dedup-row--suggested{% endif %}">
+        <label class="dedup-label">
+          <input type="radio" name="keep_id_{{ loop.index0 }}" value="{{ paper.id }}"
+            {% if paper.id == group.keep_id %}checked{% endif %}>
+          <span class="dedup-paper-info">
+            <strong>ID {{ paper.id }}</strong> · {{ paper.title or 'No title' }}
+            {% if paper.doi %}<span class="dedup-doi">DOI: {{ paper.doi }}</span>{% endif %}
+            {% if paper.pmid %}<span class="dedup-pmid">PMID: {{ paper.pmid }}</span>{% endif %}
+          </span>
+          {% if paper.id == group.keep_id %}
+          <span class="pill pill--success">Suggested</span>
+          {% endif %}
+        </label>
+      </div>
+      {% endfor %}
+      <input type="hidden" name="keep_id" value="{{ group.keep_id }}">
+    </div>
+    {% endfor %}
+    <div class="form-actions mt-2">
+      <button type="submit" class="btn btn-primary">Resolve All Duplicates</button>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="card empty-state">
+  <div class="empty-icon">✨</div>
+  <h3>No duplicates detected</h3>
+  <p>All {{ stats.total }} papers appear to be unique based on PMID, DOI, and title matching.</p>
+  <a href="{{ url_for('screening.index') }}" class="btn btn-primary">Start Screening →</a>
+</div>
+{% endif %}
+{% endblock %}

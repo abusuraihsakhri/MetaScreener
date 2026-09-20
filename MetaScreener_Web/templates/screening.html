@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Screening — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Abstract Screening</h2>
+  <p class="page-subtitle">{{ remaining }} paper(s) remaining · {{ stats.progress }}% complete</p>
+</div>
+
+<div class="progress-bar-wrap mb-2">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" style="width: {{ stats.progress }}%"></div>
+  </div>
+  <span class="progress-label">{{ stats.included }} included · {{ stats.excluded }} excluded · {{ stats.uncertain }} uncertain</span>
+</div>
+
+{% if paper %}
+<div class="screening-layout">
+  <div class="card screening-card">
+    <div class="paper-meta">
+      <span class="paper-id">ID {{ paper.id }}</span>
+      {% if paper.year %}<span class="paper-year">{{ paper.year }}</span>{% endif %}
+      {% if paper.doi %}<a href="https://doi.org/{{ paper.doi }}" target="_blank" rel="noopener" class="paper-doi">DOI ↗</a>{% endif %}
+    </div>
+    <h3 class="paper-title">{{ paper.title or 'No title' }}</h3>
+    <p class="paper-authors">{{ paper.authors or 'Unknown authors' }}</p>
+    <div class="abstract-box">
+      <strong>Abstract</strong>
+      <p>{{ paper.abstract or 'No abstract available.' }}</p>
+    </div>
+
+    <div class="screening-actions">
+      <form method="POST" action="{{ url_for('screening.decide') }}" id="decideForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="paper_id" value="{{ paper.id }}">
+        <input type="hidden" name="decision" id="decisionInput">
+        <input type="hidden" name="reason" id="reasonInput">
+        <div class="decision-btns">
+          <button type="button" class="btn btn-success" onclick="decide('include')">✅ Include <kbd>I</kbd></button>
+          <button type="button" class="btn btn-danger"  onclick="decide('exclude')">❌ Exclude <kbd>E</kbd></button>
+          <button type="button" class="btn btn-warning" onclick="decide('uncertain')">❓ Uncertain <kbd>U</kbd></button>
+        </div>
+      </form>
+
+      <div class="secondary-actions">
+        <form method="POST" action="{{ url_for('screening.undo') }}" style="display:inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-outline">↩ Undo <kbd>Z</kbd></button>
+        </form>
+        <button class="btn btn-outline" id="aiBtn" onclick="getAISuggestion()">🤖 AI Suggest</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card ai-panel" id="aiPanel" style="display:none">
+    <h4>AI Suggestion</h4>
+    <div id="aiContent">
+      <div class="ai-loading">Querying AI…</div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="card empty-state">
+  <div class="empty-icon">🎉</div>
+  <h3>All papers screened!</h3>
+  <p>You have completed abstract screening for all {{ stats.total }} unique papers.</p>
+  <a href="{{ url_for('export.index') }}" class="btn btn-primary">Export Results →</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function decide(decision) {
+  document.getElementById('decisionInput').value = decision;
+  document.getElementById('reasonInput').value = document.getElementById('aiReason')?.textContent || '';
+  document.getElementById('decideForm').submit();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'i' || e.key === 'I') decide('include');
+  if (e.key === 'e' || e.key === 'E') decide('exclude');
+  if (e.key === 'u' || e.key === 'U') decide('uncertain');
+});
+
+async function getAISuggestion() {
+  const panel = document.getElementById('aiPanel');
+  const content = document.getElementById('aiContent');
+  panel.style.display = 'block';
+  content.innerHTML = '<div class="ai-loading">🤖 Querying AI provider…</div>';
+  document.getElementById('aiBtn').disabled = true;
+
+  try {
+    const resp = await fetch('{{ url_for("screening.ai_suggest", paper_id=paper.id) if paper else "#" }}', {
+      method: 'POST',
+      headers: {'X-CSRFToken': '{{ csrf_token() }}', 'Content-Type': 'application/json'}
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      const r = data.result;
+      const colorMap = {include: '#2ECC71', exclude: '#E74C3C', uncertain: '#F39C12'};
+      content.innerHTML = `
+        <div class="ai-decision" style="color:${colorMap[r.decision] || '#333'}">
+          <strong>${r.decision.toUpperCase()}</strong>
+          <span class="ai-confidence">Confidence: ${r.confidence}%</span>
+        </div>
+        <p class="ai-reason" id="aiReason">${r.reason}</p>
+        <div class="ai-apply-btns">
+          <button class="btn btn-sm btn-primary" onclick="applyAI('${r.decision}', '${r.reason.replace(/'/g,"\\'")}')">Apply this decision</button>
+        </div>`;
+    } else {
+      content.innerHTML = `<div class="ai-error">Error: ${data.error}</div>`;
+    }
+  } catch(err) {
+    content.innerHTML = `<div class="ai-error">Network error: ${err}</div>`;
+  }
+  document.getElementById('aiBtn').disabled = false;
+}
+
+function applyAI(decision, reason) {
+  document.getElementById('decisionInput').value = decision;
+  document.getElementById('reasonInput').value = reason;
+  document.getElementById('decideForm').submit();
+}
+</script>
+{% endblock %}

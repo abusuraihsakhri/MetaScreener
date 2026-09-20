@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Dashboard</h2>
+  <p class="page-subtitle">Overview of your systematic review progress</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">📄</div>
+    <div class="stat-value">{{ dedup.total }}</div>
+    <div class="stat-label">Total Identified</div>
+  </div>
+  <div class="stat-card stat-card--warning">
+    <div class="stat-icon">🔁</div>
+    <div class="stat-value">{{ dedup.duplicates }}</div>
+    <div class="stat-label">Duplicates Removed</div>
+  </div>
+  <div class="stat-card stat-card--info">
+    <div class="stat-icon">📋</div>
+    <div class="stat-value">{{ dedup.unique }}</div>
+    <div class="stat-label">Unique Papers</div>
+  </div>
+  <div class="stat-card stat-card--success">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ screen.included }}</div>
+    <div class="stat-label">Included</div>
+  </div>
+  <div class="stat-card stat-card--danger">
+    <div class="stat-icon">❌</div>
+    <div class="stat-value">{{ screen.excluded }}</div>
+    <div class="stat-label">Excluded</div>
+  </div>
+  <div class="stat-card stat-card--muted">
+    <div class="stat-icon">⏳</div>
+    <div class="stat-value">{{ screen.pending }}</div>
+    <div class="stat-label">Pending</div>
+  </div>
+</div>
+
+<div class="cards-row">
+  <div class="card">
+    <h3 class="card-title">Screening Progress</h3>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ screen.progress }}%"></div>
+      </div>
+      <span class="progress-label">{{ screen.progress }}% complete</span>
+    </div>
+    <div class="decision-breakdown">
+      <span class="pill pill--success">{{ screen.included }} included</span>
+      <span class="pill pill--danger">{{ screen.excluded }} excluded</span>
+      <span class="pill pill--warning">{{ screen.uncertain }} uncertain</span>
+      <span class="pill pill--muted">{{ screen.pending }} pending</span>
+    </div>
+    <a href="{{ url_for('screening.index') }}" class="btn btn-primary mt-2">Continue Screening →</a>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">PRISMA Flow</h3>
+    <table class="prisma-table">
+      <tr><td>Records identified</td><td class="num">{{ prisma.identified }}</td></tr>
+      <tr><td>Duplicates removed</td><td class="num">{{ prisma.duplicates }}</td></tr>
+      <tr><td>Records screened</td><td class="num">{{ prisma.screened }}</td></tr>
+      <tr><td>Excluded (screening)</td><td class="num">{{ prisma.excluded_screening }}</td></tr>
+      <tr><td>Full-text assessed</td><td class="num">{{ prisma.eligible }}</td></tr>
+      <tr><td>Excluded (full-text)</td><td class="num">{{ prisma.excluded_fulltext }}</td></tr>
+      <tr class="prisma-final"><td><strong>Studies included</strong></td><td class="num"><strong>{{ prisma.included }}</strong></td></tr>
+    </table>
+    <a href="{{ url_for('export.download_excel') }}" class="btn btn-outline mt-2">Download Excel →</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{
+  "MODEL_NAME": "mistral:7b-instruct-v0.3-q4_K_M",
+  "OLLAMA_URL": "http://localhost:11434/api/generate",
+  "INCLUSION_CRITERIA": "human studies, vaginal yolk sac tumor only, yolk sac tumor only, extragonadal yolk sac tumor only, pediatric patients",
+  "EXCLUSION_CRITERIA": "animal studies, review articles, opinions, meta analysis, review articles"
+}

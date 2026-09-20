@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Settings — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Settings</h2>
+  <p class="page-subtitle">AI provider configuration (edit .env to change credentials)</p>
+</div>
+
+<div class="card">
+  <h3 class="card-title">Active AI Provider</h3>
+  <div class="provider-badge">
+    {{ provider_labels.get(config.AI_PROVIDER, config.AI_PROVIDER) }}
+  </div>
+
+  <table class="settings-table mt-2">
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Provider</td><td><code>{{ config.AI_PROVIDER }}</code></td></tr>
+    {% if config.AI_PROVIDER == 'ollama' %}
+    <tr><td>Ollama URL</td><td><code>{{ config.OLLAMA_URL }}</code></td></tr>
+    <tr><td>Model</td><td><code>{{ config.OLLAMA_MODEL }}</code></td></tr>
+    {% elif config.AI_PROVIDER == 'openai' %}
+    <tr><td>Model</td><td><code>{{ config.OPENAI_MODEL }}</code></td></tr>
+    <tr><td>API Key</td><td><code>{{ '••••' + config.OPENAI_API_KEY[-4:] if config.OPENAI_API_KEY else 'Not set' }}</code></td></tr>
+    {% elif config.AI_PROVIDER == 'anthropic' %}
+    <tr><td>Model</td><td><code>{{ config.ANTHROPIC_MODEL }}</code></td></tr>
+    <tr><td>API Key</td><td><code>{{ '••••' + config.ANTHROPIC_API_KEY[-4:] if config.ANTHROPIC_API_KEY else 'Not set' }}</code></td></tr>
+    {% elif config.AI_PROVIDER == 'gemini' %}
+    <tr><td>Model</td><td><code>{{ config.GEMINI_MODEL }}</code></td></tr>
+    <tr><td>API Key</td><td><code>{{ '••••' + config.GEMINI_API_KEY[-4:] if config.GEMINI_API_KEY else 'Not set' }}</code></td></tr>
+    {% elif config.AI_PROVIDER == 'openai_compatible' %}
+    <tr><td>Base URL</td><td><code>{{ config.CUSTOM_BASE_URL or 'Not set' }}</code></td></tr>
+    <tr><td>Model</td><td><code>{{ config.CUSTOM_MODEL or 'Not set' }}</code></td></tr>
+    {% endif %}
+    <tr><td>Temp (Screening)</td><td><code>{{ config.TEMPERATURE_SCREEN }}</code></td></tr>
+    <tr><td>Temp (Extraction)</td><td><code>{{ config.TEMPERATURE_EXTRACT }}</code></td></tr>
+  </table>
+
+  <div class="form-actions mt-2">
+    <button class="btn btn-primary" onclick="testConnection()">Test Connection</button>
+    <button class="btn btn-outline" onclick="fetchModels()">List Models</button>
+  </div>
+  <div id="connResult" class="conn-result mt-1" style="display:none"></div>
+  <div id="modelList" class="model-list mt-1" style="display:none"></div>
+</div>
+
+<div class="card mt-2">
+  <h3 class="card-title">How to change provider</h3>
+  <ol class="help-steps">
+    <li>Edit the <code>.env</code> file in <code>MetaScreener_Web/</code></li>
+    <li>Set <code>AI_PROVIDER=openai</code> (or <code>anthropic</code>, <code>gemini</code>, <code>ollama</code>, <code>openai_compatible</code>)</li>
+    <li>Set the matching API key and model variables</li>
+    <li>Restart the Flask server</li>
+  </ol>
+  <div class="provider-examples">
+    {% for key, label in provider_labels.items() %}
+    <div class="provider-chip {% if key == config.AI_PROVIDER %}provider-chip--active{% endif %}">{{ label }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function testConnection() {
+  const el = document.getElementById('connResult');
+  el.style.display = 'block';
+  el.className = 'conn-result mt-1';
+  el.textContent = 'Testing…';
+  const resp = await fetch('{{ url_for("settings.test_connection") }}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token() }}'}
+  });
+  const data = await resp.json();
+  el.textContent = (data.ok ? '✅ ' : '❌ ') + data.message;
+  el.className = 'conn-result mt-1 ' + (data.ok ? 'conn-ok' : 'conn-fail');
+}
+
+async function fetchModels() {
+  const el = document.getElementById('modelList');
+  el.style.display = 'block';
+  el.textContent = 'Fetching…';
+  const resp = await fetch('{{ url_for("settings.list_models") }}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token() }}'}
+  });
+  const data = await resp.json();
+  if (data.models && data.models.length) {
+    el.innerHTML = '<strong>Available models:</strong><br>' + data.models.map(m => `<code>${m}</code>`).join(' · ');
+  } else {
+    el.textContent = 'No models returned.';
+  }
+}
+</script>
+{% endblock %}

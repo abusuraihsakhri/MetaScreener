@@ -1,0 +1,15 @@
+flask>=3.0
+flask-login>=0.6
+flask-wtf>=1.2
+flask-limiter>=3.5
+werkzeug>=3.0
+python-dotenv>=1.0
+rispy>=0.9
+bibtexparser>=1.4
+rapidfuzz>=3.6
+PyMuPDF>=1.23
+openpyxl>=3.1
+requests>=2.31
+tqdm>=4.66
+flask-cors>=4.0
+PyJWT>=2.8

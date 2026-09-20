@@ -1,0 +1,97 @@
+[
+  {
+    "name": "study_design",
+    "label": "Study Design",
+    "type": "select",
+    "options": [
+      "Case report",
+      "Case series",
+      "Cohort",
+      "RCT",
+      "Retrospective",
+      "Prospective",
+      "Systematic review",
+      "Other"
+    ]
+  },
+  {
+    "name": "sample_size",
+    "label": "Sample Size (n)",
+    "type": "number"
+  },
+  {
+    "name": "age_mean",
+    "label": "Mean Age (years)",
+    "type": "number"
+  },
+  {
+    "name": "age_range",
+    "label": "Age Range",
+    "type": "text"
+  },
+  {
+    "name": "sex_male",
+    "label": "Male patients (n)",
+    "type": "number"
+  },
+  {
+    "name": "sex_female",
+    "label": "Female patients (n)",
+    "type": "number"
+  },
+  {
+    "name": "tumor_location",
+    "label": "Tumor Location / Site",
+    "type": "text"
+  },
+  {
+    "name": "staging",
+    "label": "Staging / Grading",
+    "type": "text"
+  },
+  {
+    "name": "afp_level",
+    "label": "AFP Level (ng/mL)",
+    "type": "text"
+  },
+  {
+    "name": "chemotherapy",
+    "label": "Chemotherapy Regimen",
+    "type": "text"
+  },
+  {
+    "name": "intervention",
+    "label": "Intervention / Treatment",
+    "type": "text"
+  },
+  {
+    "name": "followup_duration",
+    "label": "Follow-up Duration",
+    "type": "text"
+  },
+  {
+    "name": "survival_outcome",
+    "label": "Survival Outcome",
+    "type": "text"
+  },
+  {
+    "name": "response_rate",
+    "label": "Response Rate / Results",
+    "type": "text"
+  },
+  {
+    "name": "adverse_events",
+    "label": "Adverse Events",
+    "type": "text"
+  },
+  {
+    "name": "conclusions",
+    "label": "Author Conclusions",
+    "type": "textarea"
+  },
+  {
+    "name": "notes",
+    "label": "Reviewer Notes",
+    "type": "textarea"
+  }
+]

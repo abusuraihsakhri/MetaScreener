@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Export — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Export &amp; Reports</h2>
+  <p class="page-subtitle">Download your systematic review data</p>
+</div>
+
+<div class="cards-row">
+  <div class="card">
+    <h3 class="card-title">📊 Excel Export</h3>
+    <p>Exports all papers, included papers, excluded papers, and data extraction results into a formatted Excel workbook.</p>
+    <ul class="export-sheets">
+      <li>Sheet 1 — All Papers</li>
+      <li>Sheet 2 — Included</li>
+      <li>Sheet 3 — Excluded</li>
+      <li>Sheet 4 — Extraction Data</li>
+    </ul>
+    <a href="{{ url_for('export.download_excel') }}" class="btn btn-primary mt-2">⬇ Download Excel</a>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">🔵 PRISMA 2020 Flow</h3>
+    <table class="prisma-table">
+      <tr><td>Records identified</td>         <td class="num">{{ prisma.identified }}</td></tr>
+      <tr><td>Duplicates removed</td>         <td class="num">{{ prisma.duplicates }}</td></tr>
+      <tr><td>Records screened</td>           <td class="num">{{ prisma.screened }}</td></tr>
+      <tr><td>Excluded (title/abstract)</td>  <td class="num">{{ prisma.excluded_screening }}</td></tr>
+      <tr><td>Full-text assessed</td>         <td class="num">{{ prisma.eligible }}</td></tr>
+      <tr><td>Excluded (full-text)</td>       <td class="num">{{ prisma.excluded_fulltext }}</td></tr>
+      <tr class="prisma-final">
+        <td><strong>Studies included</strong></td>
+        <td class="num"><strong>{{ prisma.included }}</strong></td>
+      </tr>
+    </table>
+    <a href="{{ url_for('export.prisma_json') }}" class="btn btn-outline mt-2">⬇ PRISMA JSON</a>
+  </div>
+</div>
+{% endblock %}

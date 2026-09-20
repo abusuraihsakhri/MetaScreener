@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MetaScreener{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">📚</span>
+    <span class="logo-text">MetaScreener</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('dashboard.index') }}" class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+      <span>🏠</span> Dashboard
+    </a></li>
+    <li><a href="{{ url_for('papers.import_papers') }}" class="{% if request.endpoint == 'papers.import_papers' %}active{% endif %}">
+      <span>📥</span> Import
+    </a></li>
+    <li><a href="{{ url_for('papers.list_papers') }}" class="{% if request.endpoint == 'papers.list_papers' %}active{% endif %}">
+      <span>📋</span> Papers
+    </a></li>
+    <li><a href="{{ url_for('dedup.index') }}" class="{% if request.endpoint == 'dedup.index' %}active{% endif %}">
+      <span>🔍</span> Deduplicate
+    </a></li>
+    <li><a href="{{ url_for('screening.index') }}" class="{% if request.endpoint == 'screening.index' %}active{% endif %}">
+      <span>✅</span> Screening
+    </a></li>
+    <li><a href="{{ url_for('export.index') }}" class="{% if request.endpoint == 'export.index' %}active{% endif %}">
+      <span>📊</span> Export
+    </a></li>
+    <li><a href="{{ url_for('settings.index') }}" class="{% if request.endpoint == 'settings.index' %}active{% endif %}">
+      <span>⚙️</span> Settings
+    </a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="logout-btn">⏏ Logout</a>
+  </div>
+</nav>
+<main class="main-content">
+{% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+{% if current_user.is_authenticated %}
+</main>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

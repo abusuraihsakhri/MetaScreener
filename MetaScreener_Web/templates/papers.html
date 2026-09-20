@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Papers — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>All Papers</h2>
+  <p class="page-subtitle">{{ papers|length }} paper(s)
+    {% if filter %} · filtered: <strong>{{ filter }}</strong>{% endif %}
+  </p>
+</div>
+
+<div class="filter-bar">
+  <a href="{{ url_for('papers.list_papers') }}" class="btn btn-sm {% if not filter %}btn-primary{% else %}btn-outline{% endif %}">All</a>
+  <a href="{{ url_for('papers.list_papers', decision='include') }}" class="btn btn-sm {% if filter=='include' %}btn-primary{% else %}btn-outline{% endif %}">Included</a>
+  <a href="{{ url_for('papers.list_papers', decision='exclude') }}" class="btn btn-sm {% if filter=='exclude' %}btn-primary{% else %}btn-outline{% endif %}">Excluded</a>
+  <a href="{{ url_for('papers.list_papers', decision='uncertain') }}" class="btn btn-sm {% if filter=='uncertain' %}btn-primary{% else %}btn-outline{% endif %}">Uncertain</a>
+  <a href="{{ url_for('papers.list_papers', decision='pending') }}" class="btn btn-sm {% if filter=='pending' %}btn-primary{% else %}btn-outline{% endif %}">Pending</a>
+  <input type="text" id="searchBox" placeholder="Search title…" class="search-input">
+</div>
+
+<div class="card p-0">
+  <table class="data-table" id="papersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Authors</th>
+        <th>Year</th>
+        <th>DOI</th>
+        <th>Decision</th>
+        <th>Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in papers %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td class="title-cell">{{ p.title or '—' }}</td>
+        <td>{{ (p.authors or '')[:40] }}{% if (p.authors or '')|length > 40 %}…{% endif %}</td>
+        <td>{{ p.year or '—' }}</td>
+        <td>
+          {% if p.doi %}
+            <a href="https://doi.org/{{ p.doi }}" target="_blank" rel="noopener">{{ p.doi[:30] }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          <span class="pill pill--{{ p.screening_decision }}">{{ p.screening_decision }}</span>
+        </td>
+        <td>{{ p.screening_confidence if p.screening_confidence is not none else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty-row">No papers found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('searchBox').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#papersTable tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

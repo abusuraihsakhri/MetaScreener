@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Import — MetaScreener{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Import References</h2>
+  <p class="page-subtitle">Upload RIS, BibTeX, CSV, or TXT reference files</p>
+</div>
+
+<div class="card">
+  <form method="POST" enctype="multipart/form-data" id="importForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">📂</div>
+      <div class="drop-text">Drag &amp; drop files here, or <label for="fileInput" class="drop-link">browse</label></div>
+      <div class="drop-hint">Supported: .ris · .bib · .csv · .txt · Max 50 MB per file</div>
+      <input type="file" id="fileInput" name="files" multiple accept=".ris,.bib,.csv,.txt" style="display:none">
+    </div>
+    <div id="fileList" class="file-list"></div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="importBtn" disabled>Import Files</button>
+      <a href="{{ url_for('papers.list_papers') }}" class="btn btn-outline">View All Papers</a>
+    </div>
+  </form>
+</div>
+
+<div class="card mt-2">
+  <h3 class="card-title">Supported Formats</h3>
+  <div class="format-grid">
+    <div class="format-item"><strong>.ris</strong> — PubMed, Embase, Scopus, Web of Science exports</div>
+    <div class="format-item"><strong>.bib</strong> — BibTeX / LaTeX reference files</div>
+    <div class="format-item"><strong>.csv</strong> — Spreadsheet exports with Title, Abstract columns</div>
+    <div class="format-item"><strong>.txt</strong> — PubMed MEDLINE, Embase, Scopus plain-text exports</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileList  = document.getElementById('fileList');
+const importBtn = document.getElementById('importBtn');
+
+function updateList(files) {
+  fileList.innerHTML = '';
+  if (!files.length) { importBtn.disabled = true; return; }
+  importBtn.disabled = false;
+  Array.from(files).forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.textContent = `📄 ${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+    fileList.appendChild(div);
+  });
+}
+
+fileInput.addEventListener('change', () => updateList(fileInput.files));
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const dt = new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+  fileInput.files = dt.files;
+  updateList(fileInput.files);
+});
+</script>
+{% endblock %}
