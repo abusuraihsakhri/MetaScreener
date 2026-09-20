@@ -69,7 +69,23 @@ function Sidebar() {
   );
 }
 
+import { Command } from '@tauri-apps/api/shell';
+import { useEffect } from 'react';
+
 function App() {
+  useEffect(() => {
+    // @ts-ignore
+    if (window.__TAURI__) {
+      console.log('Tauri environment detected. Spawning Python sidecar...');
+      const command = Command.sidecar('bin/api');
+      command.spawn().then((child) => {
+        console.log('Sidecar spawned successfully with PID:', child.pid);
+      }).catch((err) => {
+        console.error('Failed to spawn sidecar:', err);
+      });
+    }
+  }, []);
+
   return (
     <Router>
       <div className="flex h-screen bg-background text-text font-sans antialiased">
