@@ -63,6 +63,10 @@ This repository includes pre-configured GitHub Actions:
 > [!NOTE]
 > If your GitHub Pages deploy fails with a 404 error, you must navigate to **Settings > Pages** in your GitHub repository and set the source to **GitHub Actions**.
 
+## Citation
+
+Sakhri, A. S. (2026). *MetaScreener* (version 389a6ec1743d) [Computer software]. Zenodo. [10.5281/zenodo.24566500](https://doi.org/10.5281/zenodo.24566500).
+
 ## License
 
 MetaScreener is available under the [MIT License](LICENSE).
