@@ -40,11 +40,12 @@ graph TD;
 ```bash
 cd MetaScreener_Web
 pip install -r requirements.txt
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 export ADMIN_PASSWORD="your_secure_password"
 python app.py
 ```
 > [!IMPORTANT]
-> Ensure you have set the `ADMIN_PASSWORD` environment variable. The app will refuse to start without it to ensure your API remains secure!
+> Set both `SECRET_KEY` and `ADMIN_PASSWORD` before starting the API. Use a fresh random secret and a strong password.
 
 ### 2. Start the Frontend UI
 ```bash
@@ -61,3 +62,7 @@ This repository includes pre-configured GitHub Actions:
 
 > [!NOTE]
 > If your GitHub Pages deploy fails with a 404 error, you must navigate to **Settings > Pages** in your GitHub repository and set the source to **GitHub Actions**.
+
+## License
+
+MetaScreener is available under the [MIT License](LICENSE).
