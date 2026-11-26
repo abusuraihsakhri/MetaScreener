@@ -42,7 +42,7 @@ cd MetaScreener_Web
 pip install -r requirements.txt
 export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 export ADMIN_PASSWORD="your_secure_password"
-python app.py
+python -m flask --app app run --port 5555
 ```
 > [!IMPORTANT]
 > Set both `SECRET_KEY` and `ADMIN_PASSWORD` before starting the API. Use a fresh random secret and a strong password.

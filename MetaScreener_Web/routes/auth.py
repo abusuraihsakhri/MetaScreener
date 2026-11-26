@@ -2,12 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required
 import jwt
 import datetime
-from app import User, limiter
+from app import User, csrf, limiter
 from config import Config
 
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/api/login", methods=["POST"])
+@csrf.exempt
 @limiter.limit("10 per minute")
 def api_login():
     data = request.get_json(silent=True) or {}
